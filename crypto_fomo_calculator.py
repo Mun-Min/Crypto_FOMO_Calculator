@@ -14,7 +14,7 @@ st.markdown(
 )
 
 # add header image  
-st.image('Images\cryptocurrencies.png', use_column_width=True)
+st.image('./Images/cryptocurrencies.png', use_column_width=True)
 
 st.markdown(
     
