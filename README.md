@@ -1,1 +1,3 @@
-# Crypto_FOMO_Calculator
+# Crypto Currency FOMO Calculator
+
+
