@@ -6,17 +6,6 @@ from pycoingecko import CoinGeckoAPI
 from datetime import datetime, timedelta
 cg = CoinGeckoAPI()
 
-# write greeting message/header 
-st.markdown( 
-    '''
-    # Crypto FOMO Calculator
-    '''
-)
-
-
-# add header image  
-st.image('./Images/cryptocurrencies.png', use_column_width=True)
-
 st.markdown(
     """
     <style>
@@ -32,6 +21,16 @@ st.set_page_config(
     page_title='Crypto FOMO Calculator',
     page_icon='./Images/cryptocurrencies.png'
 )
+
+# write greeting message/header 
+st.markdown( 
+    '''
+    # Crypto FOMO Calculator
+    '''
+)
+
+# add header image  
+st.image('./Images/cryptocurrencies.png', use_column_width=True)
 
 st.markdown(
     
