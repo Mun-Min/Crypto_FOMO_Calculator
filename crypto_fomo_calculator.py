@@ -17,8 +17,21 @@ st.markdown(
 # add header image  
 st.image('./Images/cryptocurrencies.png', use_column_width=True)
 
-# set page config
-st.set_page_config(page_title='Crypto FOMO Calculator', page_icon='./Images/cryptocurrencies.png', page_bg_color='#b4d8e7')
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #b4d8e7;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.set_page_config(
+    page_title='Crypto FOMO Calculator',
+    page_icon='./Images/cryptocurrencies.png'
+)
 
 st.markdown(
     
