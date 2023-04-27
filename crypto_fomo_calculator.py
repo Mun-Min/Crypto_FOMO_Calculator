@@ -6,22 +6,6 @@ from pycoingecko import CoinGeckoAPI
 from datetime import datetime, timedelta
 cg = CoinGeckoAPI()
 
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #b4d8e7;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.set_page_config(
-    page_title='Crypto FOMO Calculator',
-    page_icon='./Images/cryptocurrencies.png'
-)
-
 # write greeting message/header 
 st.markdown( 
     '''
