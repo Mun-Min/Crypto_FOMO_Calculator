@@ -18,4 +18,4 @@ https://user-images.githubusercontent.com/108703181/204167749-6b82f868-241c-4940
 
 <br>
 
-APP LINK --> https://lilmuni-cryptofomocalculator.streamlit.app/
+APP LINK --> https://cryptofomocalculator.streamlit.app/ 
