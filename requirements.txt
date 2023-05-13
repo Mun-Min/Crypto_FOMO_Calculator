@@ -2,3 +2,5 @@ matplotlib==3.5.2
 pandas==1.4.4
 pycoingecko==2.2.0
 streamlit==1.15.2
+altair==4.1.0
+vega_datasets==0.9.0
