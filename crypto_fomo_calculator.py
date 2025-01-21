@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import yfinance as yf
 from datetime import datetime, timedelta
 import time
@@ -67,16 +66,17 @@ selected_historical_date_reformat = selected_historical_date.strftime("%Y-%m-%d"
 selected_historical_date_datetime = datetime.strptime(selected_historical_date_reformat, "%Y-%m-%d")
 
 # Try to fetch historical price for the selected date
-historical_data = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=selected_historical_date_reformat)
-
-# Debug: Print the historical data
-st.write(f"Fetched historical data for {selected_historical_date_reformat}:")
-st.write(historical_data)
-
-if not historical_data.empty:
+try:
+    historical_data = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=selected_historical_date_reformat)
+    if historical_data.empty:
+        raise ValueError("No data found for the selected date.")
     selected_crypto_currency_historic = historical_data['Close'].iloc[0]
-else:
-    selected_crypto_currency_historic = 0
+except Exception as e:
+    # If no data is found for the selected date, fetch the closest available date
+    st.write(f"Error fetching historical data for {selected_historical_date_reformat}: {e}")
+    st.write("Fetching the most recent available data...")
+    historical_data = yf.download(selected_crypto_currency, period="5d")  # Fetch the last 5 days
+    selected_crypto_currency_historic = historical_data['Close'].iloc[-1]  # Take the last available price
 
 # Display Results - Historical Value
 st.write('''# Results''')
