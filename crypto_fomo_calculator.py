@@ -75,8 +75,11 @@ except Exception as e:
     # If no data is found for the selected date, fetch the closest available date
     st.write(f"Error fetching historical data for {selected_historical_date_reformat}: {e}")
     st.write("Fetching the most recent available data...")
-    historical_data = yf.download(selected_crypto_currency, period="5d")  # Fetch the last 5 days
+    
+    # Fetch the last 30 days of data and pick the last available date
+    historical_data = yf.download(selected_crypto_currency, period="30d")
     selected_crypto_currency_historic = historical_data['Close'].iloc[-1]  # Take the last available price
+    st.write(f"Using the most recent available price: {selected_crypto_currency_historic}")
 
 # Display Results - Historical Value
 st.write('''# Results''')
