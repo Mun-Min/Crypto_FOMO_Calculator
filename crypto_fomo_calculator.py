@@ -18,10 +18,10 @@ def get_cached_crypto_price(symbol):
     # If cache is expired or data is not available, fetch new data
     if cache_timestamp is None or current_time - cache_timestamp > CACHE_EXPIRY or symbol not in cached_crypto_price:
         crypto_data = yf.Ticker(symbol).history(period="1d")
-        cached_crypto_price[symbol] = crypto_data['Close'].iloc[-1]
+        cached_crypto_price[symbol] = crypto_data['Close'].iloc[-1] if not crypto_data.empty else None
         cache_timestamp = current_time
 
-    return cached_crypto_price[symbol]
+    return cached_crypto_price.get(symbol, None)
 
 # Write greeting message/header
 st.markdown('''
@@ -49,11 +49,10 @@ st.sidebar.write('You have selected', selected_crypto_currency)
 # Date the user wishes they purchased selected crypto
 st.sidebar.write('## Choose Date and Amount')
 
-# Get today's date in UTC
 today = datetime.now(timezone.utc).date()
 previous_day = today - timedelta(days=1)
 
-selected_historical_date = st.sidebar.date_input("Date: ", value=previous_day, min_value=datetime(2015, 1, 1), max_value=previous_day)
+selected_historical_date = st.sidebar.date_input("Date: ", value=previous_day, min_value=datetime(2015, 1, 1).date(), max_value=previous_day)
 st.sidebar.write('You have selected', selected_historical_date)
 
 # Amount you wish you would have invested
@@ -97,7 +96,8 @@ st.markdown(mystyle, unsafe_allow_html=True)
 if selected_crypto_currency_historic == 0:
     st.write("You would have originally bought: 0", selected_crypto_currency)
 else:
-    st.write("You would have originally bought: ", round((selected_amount / selected_crypto_currency_historic), 5), selected_crypto_currency)
+    coins_bought = round((selected_amount / selected_crypto_currency_historic), 5)
+    st.write("You would have originally bought: ", coins_bought, selected_crypto_currency)
 
 st.write("At a price of $", selected_crypto_currency_historic, ' per', selected_crypto_currency)
 
@@ -112,7 +112,7 @@ st.markdown(mystyle, unsafe_allow_html=True)
 if selected_crypto_currency_historic == 0:
     total_coins = 0
 else:
-    total_coins = selected_amount / selected_crypto_currency_historic
+    total_coins = coins_bought
 
 # Present value based on the current price
 current_selected_currency_type = total_coins * crypto_current
