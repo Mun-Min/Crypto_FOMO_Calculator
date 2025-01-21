@@ -1,12 +1,9 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from pycoingecko import CoinGeckoAPI
+import yfinance as yf
 from datetime import datetime, timedelta
 import time
-
-# Initialize CoinGecko API
-cg = CoinGeckoAPI()
 
 # Cache setup: store data and expiration time
 CACHE_EXPIRY = 5 * 60  # 5 minutes in seconds
@@ -14,17 +11,18 @@ cache_timestamp = None
 cached_crypto_price = {}
 
 # Function to get crypto price with caching
-def get_cached_crypto_price(id, selected_currency_type):
+def get_cached_crypto_price(symbol):
     global cache_timestamp, cached_crypto_price
     
     current_time = time.time()
 
     # If cache is expired or data is not available, fetch new data
-    if cache_timestamp is None or current_time - cache_timestamp > CACHE_EXPIRY or id not in cached_crypto_price:
-        cached_crypto_price[id] = cg.get_price(id, vs_currencies=selected_currency_type)[id][selected_currency_type]
+    if cache_timestamp is None or current_time - cache_timestamp > CACHE_EXPIRY or symbol not in cached_crypto_price:
+        crypto_data = yf.Ticker(symbol).history(period="1d")
+        cached_crypto_price[symbol] = crypto_data['Close'].iloc[-1]
         cache_timestamp = current_time
 
-    return cached_crypto_price[id]
+    return cached_crypto_price[symbol]
 
 # Write greeting message/header
 st.markdown('''
@@ -47,10 +45,8 @@ st.write('---')
 
 # Select cryptocurrency
 st.sidebar.write('## Choose Crypto Currency')
-selected_crypto_currency = st.sidebar.radio('Select Crypto Currency', ['bitcoin', 'dogecoin', 'ethereum', 'binancecoin', 'chainlink', 'cardano', 'litecoin', 'solana', 'ripple'])
+selected_crypto_currency = st.sidebar.radio('Select Crypto Currency', ['BTC-USD', 'DOGE-USD', 'ETH-USD', 'BNB-USD', 'LINK-USD', 'ADA-USD', 'LTC-USD', 'SOL-USD', 'XRP-USD'])
 st.sidebar.write('You have selected', selected_crypto_currency)
-
-id = selected_crypto_currency
 
 # Date the user wishes they purchased selected crypto
 st.sidebar.write('## Choose Date and Amount')
@@ -61,21 +57,21 @@ previous_day = today - timedelta(days=1)
 selected_historical_date = st.sidebar.date_input("Date: ", value=previous_day, min_value=datetime(2015, 1, 1), max_value=previous_day)
 st.sidebar.write('You have selected', selected_historical_date)
 
-# Select the Currency type of your choice
-st.sidebar.write('## Choose Currency Type')
-selected_currency_type = st.sidebar.selectbox('Select Currency Type', ['usd'])
-
 # Amount you wish you would have invested
-selected_amount = st.sidebar.number_input(selected_currency_type + " Amount: ", min_value=1, max_value=999999999)
+selected_amount = st.sidebar.number_input("USD Amount: ", min_value=1, max_value=999999999)
 
 # Load Data
-crypto_current = get_cached_crypto_price(id, selected_currency_type)
+crypto_current = get_cached_crypto_price(selected_crypto_currency)
 
 # Reformat Historical Date for next function
-selected_historical_date_reformat = selected_historical_date.strftime("%d-%m-%Y")
-selected_historical_date_datetime = datetime.strptime(selected_historical_date_reformat, "%d-%m-%Y")
-selected_crypto_currency_historic = cg.get_coin_history_by_id(id, vs_currencies=selected_currency_type, date=selected_historical_date_reformat)['market_data']['current_price'][selected_currency_type]
-selected_crypto_currency_historic = round(selected_crypto_currency_historic, 5)
+selected_historical_date_reformat = selected_historical_date.strftime("%Y-%m-%d")
+selected_historical_date_datetime = datetime.strptime(selected_historical_date_reformat, "%Y-%m-%d")
+historical_data = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=selected_historical_date_reformat)
+
+if not historical_data.empty:
+    selected_crypto_currency_historic = historical_data['Close'].iloc[0]
+else:
+    selected_crypto_currency_historic = 0
 
 # Display Results - Historical Value
 st.write('''# Results''')
@@ -127,25 +123,21 @@ else:
     st.write('''# You Missed Out On''')
 st.write('$', abs(round(selected_currency_type_diff, 2)), "!!!")
 
-now = datetime.now()
-historical_prices = cg.get_coin_market_chart_range_by_id(id, vs_currency=selected_currency_type, from_timestamp=selected_historical_date_datetime.timestamp(), to_timestamp=now.timestamp())['prices']
+# Fetch historical prices
+historical_prices = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=today.strftime("%Y-%m-%d"))
 
-dates = []
-prices = []
+# Prepare data for charting
+dates = historical_prices.index
+prices = historical_prices['Close']
 
-for x, y in historical_prices:
-    dates.append(x)
-    prices.append(y)
-
-dictionary = {"Prices": prices, "Dates": dates}
-df = pd.DataFrame(dictionary)
-df['Dates'] = pd.to_datetime(df['Dates'], unit='ms', origin='unix')
+df = pd.DataFrame({"Prices": prices, "Dates": dates})
+df['Dates'] = pd.to_datetime(df['Dates'])
 
 st.area_chart(df.rename(columns={"Dates": "index"}).set_index("index"))
 
-# Add reference to CoinGecko API
+# Add reference to Yahoo Finance
 mystyle = '''
-          <div style="text-align: center"> <b>Powered by CoinGecko API</b> </div>
+          <div style="text-align: center"> <b>Powered by Yahoo Finance API</b> </div>
           '''
 st.markdown(mystyle, unsafe_allow_html=True)
 st.write('---')
