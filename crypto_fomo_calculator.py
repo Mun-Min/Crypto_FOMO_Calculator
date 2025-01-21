@@ -107,21 +107,26 @@ mystyle = '''
           '''
 st.markdown(mystyle, unsafe_allow_html=True)
 
+# Calculate the total number of coins based on the historical price
 if selected_crypto_currency_historic == 0:
     total_coins = 0
 else:
     total_coins = selected_amount / selected_crypto_currency_historic
 
+# Present value based on the current price
 current_selected_currency_type = total_coins * crypto_current
+
+# Calculate percentage change
 perc_change = (current_selected_currency_type - selected_amount) / (selected_amount) * 100
 selected_currency_type_diff = current_selected_currency_type - selected_amount
 
 st.write("That is currently worth: $", round(current_selected_currency_type, 2))
 st.write("Which is a percentage change of ", round(perc_change, 2), "%")
 
+# Displaying if the user broke even or missed out
 if selected_currency_type_diff == 0:
     st.write('''# You Broke Even''')
-elif selected_currency_type_diff <= 0:
+elif selected_currency_type_diff < 0:
     st.write('''# You Would Have Lost''')
 else:
     st.write('''# You Missed Out On''')
