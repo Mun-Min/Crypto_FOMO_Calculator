@@ -5,3 +5,4 @@ pycoingecko==2.2.0
 altair==4.1.0
 vega_datasets==0.9.0
 toolz==0.12.0  # Added for toolz dependency (as it was missing in your previous error)
+numpy==1.24.2  # Added NumPy to avoid compatibility issue
