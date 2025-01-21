@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import yfinance as yf
+from yahoo_fin import stock_info as si
 from datetime import datetime, timedelta, timezone
 import time
 
@@ -17,8 +17,11 @@ def get_cached_crypto_price(symbol):
 
     # If cache is expired or data is not available, fetch new data
     if cache_timestamp is None or current_time - cache_timestamp > CACHE_EXPIRY or symbol not in cached_crypto_price:
-        crypto_data = yf.Ticker(symbol).history(period="1d")
-        cached_crypto_price[symbol] = crypto_data['Close'].iloc[-1] if not crypto_data.empty else None
+        try:
+            cached_crypto_price[symbol] = si.get_live_price(symbol)
+        except Exception as e:
+            cached_crypto_price[symbol] = None
+            st.write(f"Error fetching current price for {symbol}: {e}")
         cache_timestamp = current_time
 
     return cached_crypto_price.get(symbol, None)
@@ -65,20 +68,20 @@ crypto_current = get_cached_crypto_price(selected_crypto_currency)
 selected_historical_date_reformat = selected_historical_date.strftime("%Y-%m-%d")
 selected_historical_date_datetime = datetime.strptime(selected_historical_date_reformat, "%Y-%m-%d")
 
-# Try to fetch historical price for the selected date
+# Try to fetch historical price for the selected date using yahoo-fin
 try:
-    historical_data = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=selected_historical_date_reformat)
+    historical_data = si.get_data(selected_crypto_currency, start_date=selected_historical_date_reformat, end_date=selected_historical_date_reformat)
     if historical_data.empty:
         raise ValueError("No data found for the selected date.")
-    selected_crypto_currency_historic = historical_data['Close'].iloc[0]
+    selected_crypto_currency_historic = historical_data['close'].iloc[0]
 except Exception as e:
     # If no data is found for the selected date, fetch the closest available date
     st.write(f"Error fetching historical data for {selected_historical_date_reformat}: {e}")
     st.write("Fetching the most recent available data...")
     
     # Fetch the last 30 days of data and pick the last available date
-    historical_data = yf.download(selected_crypto_currency, period="30d")
-    selected_crypto_currency_historic = historical_data['Close'].iloc[-1]  # Take the last available price
+    historical_data = si.get_data(selected_crypto_currency, start_date=(today - timedelta(days=30)).strftime("%Y-%m-%d"), end_date=today.strftime("%Y-%m-%d"))
+    selected_crypto_currency_historic = historical_data['close'].iloc[-1]  # Take the last available price
     st.write(f"Using the most recent available price: {selected_crypto_currency_historic}")
 
 # Display Results - Historical Value
@@ -137,11 +140,11 @@ else:
 st.write('$', abs(round(selected_currency_type_diff, 2)), "!!!")
 
 # Fetch historical prices for chart
-historical_prices = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=today.strftime("%Y-%m-%d"))
+historical_prices = si.get_data(selected_crypto_currency, start_date=selected_historical_date_reformat, end_date=today.strftime("%Y-%m-%d"))
 
 # Prepare data for charting
 dates = historical_prices.index
-prices = historical_prices['Close']
+prices = historical_prices['close']
 
 df = pd.DataFrame({"Prices": prices, "Dates": dates})
 df['Dates'] = pd.to_datetime(df['Dates'])
