@@ -32,7 +32,7 @@ st.markdown('''
 ''')
 
 # Ensure the image path is correct in your project folder (e.g., upload "cryptocurrencies.png")
-st.image('cryptocurrencies.png', use_column_width=True)
+st.image('./Images/cryptocurrencies.png', use_column_width=True)
 
 st.markdown('''
     ##### Steps to calculate the amount you might have gained by investing in crypto at an earlier date.
