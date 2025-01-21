@@ -31,8 +31,8 @@ st.markdown('''
     # Crypto FOMO Calculator
 ''')
 
-# Add header image
-st.image('./Images/cryptocurrencies.png', use_column_width=True)
+# Ensure the image path is correct in your project folder (e.g., upload "cryptocurrencies.png")
+st.image('cryptocurrencies.png', use_column_width=True)
 
 st.markdown('''
     ##### Steps to calculate the amount you might have gained by investing in crypto at an earlier date.
@@ -80,9 +80,13 @@ selected_crypto_currency_historic = round(selected_crypto_currency_historic, 5)
 # Display Results - Historical Value
 st.write('''# Results''')
 
-# Display image of selected crypto-currency
-from crypto_images import parse_image
-parse_image(selected_crypto_currency)
+# Display image of selected crypto-currency (handle custom images or use a default image)
+# If the `crypto_images` module is not available, consider using a default image or remove the line
+try:
+    from crypto_images import parse_image
+    parse_image(selected_crypto_currency)
+except ImportError:
+    st.image('default_image.png')  # Replace with a default image if parse_image isn't available
 
 mystyle = '''
           <div style="text-align: left"> <p> <font size = "4"> <b><u>Historical Analysis</u></b> </font> </p> </div>
