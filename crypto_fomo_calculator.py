@@ -29,7 +29,6 @@ st.markdown('''
     # Crypto FOMO Calculator
 ''')
 
-# Ensure the image path is correct in your project folder (e.g., upload "cryptocurrencies.png")
 st.image('./Images/cryptocurrencies.png', use_column_width=True)
 
 st.markdown('''
@@ -66,7 +65,13 @@ crypto_current = get_cached_crypto_price(selected_crypto_currency)
 # Reformat Historical Date for next function
 selected_historical_date_reformat = selected_historical_date.strftime("%Y-%m-%d")
 selected_historical_date_datetime = datetime.strptime(selected_historical_date_reformat, "%Y-%m-%d")
+
+# Try to fetch historical price for the selected date
 historical_data = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=selected_historical_date_reformat)
+
+# Debug: Print the historical data
+st.write(f"Fetched historical data for {selected_historical_date_reformat}:")
+st.write(historical_data)
 
 if not historical_data.empty:
     selected_crypto_currency_historic = historical_data['Close'].iloc[0]
@@ -77,7 +82,6 @@ else:
 st.write('''# Results''')
 
 # Display image of selected crypto-currency (handle custom images or use a default image)
-# If the `crypto_images` module is not available, consider using a default image or remove the line
 try:
     from crypto_images import parse_image
     parse_image(selected_crypto_currency)
@@ -123,7 +127,7 @@ else:
     st.write('''# You Missed Out On''')
 st.write('$', abs(round(selected_currency_type_diff, 2)), "!!!")
 
-# Fetch historical prices
+# Fetch historical prices for chart
 historical_prices = yf.download(selected_crypto_currency, start=selected_historical_date_reformat, end=today.strftime("%Y-%m-%d"))
 
 # Prepare data for charting
