@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import time
 
 # Cache setup: store data and expiration time
@@ -49,7 +49,8 @@ st.sidebar.write('You have selected', selected_crypto_currency)
 # Date the user wishes they purchased selected crypto
 st.sidebar.write('## Choose Date and Amount')
 
-today = datetime.utcnow().date()
+# Get today's date in UTC
+today = datetime.now(timezone.utc).date()
 previous_day = today - timedelta(days=1)
 
 selected_historical_date = st.sidebar.date_input("Date: ", value=previous_day, min_value=datetime(2015, 1, 1), max_value=previous_day)
